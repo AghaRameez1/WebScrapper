@@ -16,7 +16,7 @@ async function run(link) {
                 let numPages = parseInt(res[5].innerText);
                 return numPages
             });
-            for (var j = 0; j < 2; j++) {
+            for (var j = 0; j < numberOfPages; j++) {
                 console.log('Page Number:', j);
                 let resLinks = await page.evaluate(() => {
                     let results = []
@@ -30,7 +30,7 @@ async function run(link) {
                 });
 
                 try {
-                    for (var i = 0; i < 2; i++) {
+                    for (var i = 0; i < resLinks.length; i++) {
                         const page1 = await browser.newPage();
                         await page1.goto(`https://www.tripadvisor.com` + resLinks[i].links);
                         resData = await page1.evaluate(() => {
