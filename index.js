@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
+const prompt = require('prompt-sync')();
 var fs = require('fs');
-async function run() {
+async function run(link) {
     return new Promise(async (resolve, reject) => {
         try {
 
@@ -9,13 +10,13 @@ async function run() {
             let resData = [];
             const browser = await puppeteer.launch({ headless: true });
             const page = await browser.newPage();
-            await page.goto('https://www.tripadvisor.com/Restaurants-g188057-Geneva.html');
+            await page.goto(link);
             let numberOfPages = await page.evaluate(() => {
                 let res = document.querySelectorAll('a.pageNum')
                 let numPages = parseInt(res[5].innerText);
                 return numPages
             });
-            for (var j = 0; j < numberOfPages; j++) {
+            for (var j = 0; j < 2; j++) {
                 console.log('Page Number:', j);
                 let resLinks = await page.evaluate(() => {
                     let results = []
@@ -29,7 +30,7 @@ async function run() {
                 });
 
                 try {
-                    for (var i = 0; i < resLinks.length; i++) {
+                    for (var i = 0; i < 2; i++) {
                         const page1 = await browser.newPage();
                         await page1.goto(`https://www.tripadvisor.com` + resLinks[i].links);
                         resData = await page1.evaluate(() => {
@@ -87,4 +88,5 @@ async function run() {
         }
     });
 };
-run().then(console.log).catch(console.error)
+const link = prompt('Enter your Link: ');
+run(link).then(console.log).catch(console.error)
