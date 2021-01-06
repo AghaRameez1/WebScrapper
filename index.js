@@ -8,15 +8,22 @@ async function run(link) {
             var data = '';
 
             let resData = [];
-            const browser = await puppeteer.launch({ headless: true });
+            const width = 600;
+            const height = 800;
+            const browser = await puppeteer.launch({ headless: false }, {
+                'defaultViewport': { 'width': width, 'height': height }
+            });
             const page = await browser.newPage();
+            page.setDefaultNavigationTimeout(90000);
+            await page.setViewport({ 'width': width, 'height': height });
+            await page.setUserAgent('UA-TEST');
             await page.goto(link);
             let numberOfPages = await page.evaluate(() => {
                 let res = document.querySelectorAll('a.pageNum')
                 let numPages = parseInt(res[5].innerText);
                 return numPages
             });
-            for (var j = 0; j < numberOfPages; j++) {
+            for (var j = 1; j <= numberOfPages; j++) {
                 console.log('Page Number:', j);
                 let resLinks = await page.evaluate(() => {
                     let results = []
@@ -71,11 +78,11 @@ async function run(link) {
                 } catch (err) {
                     console.log(err);
                 }
-
-
-
-                // console.log(resLinks);
-                await page.click('div.unified a.next', { waitUntil: 'domcontentloaded' });
+                const is_disabled = await page.$('div.unified a.next') !== null;
+                console.log(is_disabled);
+                if (is_disabled) {
+                    await page.evaluate(() => document.querySelector('div.unified a.next').click({ waitUntil: 'domcontentloaded' }))
+                }
             }
             fs.appendFile('DataColected.xls', data, (err) => {
                 if (err) throw err;
