@@ -1,12 +1,10 @@
 const puppeteer = require('puppeteer');
 const prompt = require('prompt-sync')();
 var fs = require('fs');
-async function run(link) {
+async function run(link,pages) {
     return new Promise(async (resolve, reject) => {
         try {
-
             var data = '';
-
             let resData = [];
             const width = 600;
             const height = 800;
@@ -18,11 +16,12 @@ async function run(link) {
             await page.setViewport({ 'width': width, 'height': height });
             await page.setUserAgent('UA-TEST');
             await page.goto(link);
-            let numberOfPages = await page.evaluate(() => {
+            let numberOfPages = await page.evaluate((pages) => {
                 let res = document.querySelectorAll('a.pageNum')
-                let numPages = parseInt(res[5].innerText);
+                let numPages = parseInt(res[pages-2].innerText);
                 return numPages
-            });
+            },pages);
+            console.log(numberOfPages);
             for (var j = 1; j <= numberOfPages; j++) {
                 console.log('Page Number:', j);
                 let resLinks = await page.evaluate(() => {
@@ -96,4 +95,5 @@ async function run(link) {
     });
 };
 const link = prompt('Enter your Link: ');
-run(link).then(console.log).catch(console.error)
+const pages= prompt('Enter Number of pages in the end: ')
+run(link, pages).then(console.log).catch(console.error)
